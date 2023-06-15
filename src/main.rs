@@ -24,7 +24,7 @@ fn main() {
                     args.get(3).unwrap_or(&String::from("file")),
                 )),
                 ManagerUploadOption::FileName(String::from(
-                    args.get(5).unwrap_or(&String::from("file.bin")),
+                    args.get(5).unwrap_or(&String::from("file")),
                 )),
                 ManagerUploadOption::RequestType(request_type),
             ]),

@@ -62,7 +62,5 @@ ___
 ## Things that are currently missing
 
 - Cancelling the download request when the upload request couldn't be performed
-- Automatically detecting the file name from the URL or download data and using it in the upload request when `ManagerUploadOption::FileName` is not provided
-- Automatically detecting the `Content-Type` from the download headers and using it in the upload request when `ManagerUploadOption::ContentType` is not provided (having the `Content-Type` header is encouraged but generally not required)
 - Better error reporting and handling
 - Documentation

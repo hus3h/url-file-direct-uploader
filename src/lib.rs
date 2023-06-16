@@ -271,6 +271,10 @@ impl Manager {
 
         println!("[i] Done");
     }
+
+    pub async fn perform_async(&self){
+        self.perform();
+    }
 }
 
 fn vec_to_easy_list(list: &Vec<String>) -> List {

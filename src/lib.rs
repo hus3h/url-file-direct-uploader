@@ -33,6 +33,7 @@ pub enum ManagerUploadOption {
 
 struct DownloadManager {
     download_url: String,
+    download_headers: Vec<String>,
     message_sender: Arc<Mutex<Sender<ManagerThreadMessage>>>,
 }
 
@@ -49,6 +50,9 @@ impl DownloadManager {
     fn perform(&self) -> Result<(), curl::Error> {
         let mut request = Easy::new();
         request.url(&self.download_url).unwrap();
+        request
+            .http_headers(vec_to_easy_list(&self.download_headers))
+            .unwrap();
 
         let header_sender = Arc::clone(&self.message_sender);
         let body_sender = Arc::clone(&self.message_sender);
@@ -105,6 +109,10 @@ impl DownloadManager {
             .unwrap();
 
         result
+    }
+
+    fn set_headers(&mut self, headers: &Vec<&str>) {
+        self.download_headers = headers.iter().map(|item| (*item).to_owned()).collect();
     }
 }
 
@@ -223,6 +231,14 @@ impl UploadManager {
 
         request_thread
     }
+
+    fn set_upload_options(&mut self, options: &Vec<ManagerUploadOption>) {
+        self.upload_options = options.clone();
+    }
+
+    fn set_headers(&mut self, headers: &Vec<&str>) {
+        self.upload_headers = headers.iter().map(|item| (*item).to_owned()).collect();
+    }
 }
 
 pub struct Manager {
@@ -235,9 +251,10 @@ impl Manager {
         download_url: &str,
         upload_url: &str,
         upload_options: Option<Vec<ManagerUploadOption>>,
+        upload_headers: Option<Vec<String>>,
     ) -> Self {
         let upload_options = upload_options.unwrap_or(vec![]);
-        let upload_headers = vec![];
+        let upload_headers = upload_headers.unwrap_or(vec![]);
         let http_boundary = String::from("---------------------------15875380808008");
 
         let (message_sender, message_receiver) = mpsc::channel::<ManagerThreadMessage>();
@@ -246,6 +263,7 @@ impl Manager {
 
         let download_manager = Arc::new(Mutex::new(DownloadManager {
             download_url: download_url.to_owned(),
+            download_headers: vec![],
             message_sender,
         }));
 
@@ -275,6 +293,21 @@ impl Manager {
 
     pub async fn perform_async(&self) {
         self.perform();
+    }
+
+    pub fn set_upload_options(&self, options: &Vec<ManagerUploadOption>) {
+        self.upload_manager
+            .lock()
+            .unwrap()
+            .set_upload_options(options);
+    }
+
+    pub fn set_upload_headers(&self, headers: &Vec<&str>) {
+        self.upload_manager.lock().unwrap().set_headers(headers);
+    }
+
+    pub fn set_download_headers(&self, headers: &Vec<&str>) {
+        self.download_manager.lock().unwrap().set_headers(headers);
     }
 }
 

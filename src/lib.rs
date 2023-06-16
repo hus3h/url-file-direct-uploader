@@ -166,8 +166,6 @@ impl UploadManager {
 
             let final_data = format!("\r\n--{http_boundary}--\r\n");
 
-            println!("[i] Starting to receive and send data, server response will be printed");
-
             let mut request = Easy::new();
             request.url(&upload_url).unwrap();
             request.http_headers(vec_to_easy_list(&headers)).unwrap();
@@ -192,6 +190,7 @@ impl UploadManager {
                             let result = final_data.into_boxed_slice().as_ref().read(buf).unwrap();
 
                             initial_data = None;
+
                             Ok(result)
                         } else {
                             panic!("Received wrong first message");
@@ -216,6 +215,8 @@ impl UploadManager {
                     Ok(data.len())
                 })
                 .unwrap();
+
+            println!("[i] Starting to receive and send data, server response will be printed");
 
             request.perform().unwrap();
         });
@@ -272,7 +273,7 @@ impl Manager {
         println!("[i] Done");
     }
 
-    pub async fn perform_async(&self){
+    pub async fn perform_async(&self) {
         self.perform();
     }
 }

@@ -39,7 +39,7 @@ cargo run [DOWNLOAD_URL] [UPLOAD_URL] [?UPLOAD_FIELD_NAME] [?UPLOAD_FILE_NAME] [
 Example:
 
 ```
-cargo run "https://example.com/image.png" "https://example.com/upload" "file" "POST" "image.png"
+cargo run "https://example.com/image.png" "https://example.com/upload" "file" "image.png" "POST" 
 ```
 ___
 

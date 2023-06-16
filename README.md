@@ -33,7 +33,7 @@ fn main(){
 ### As a command line tool (limited to basic usage)
 
 ```
-cargo run [DOWNLOAD_URL] [UPLOAD_URL] [?UPLOAD_FIELD_NAME] [?REQUEST_TYPE] [?UPLOAD_FILE_NAME]
+cargo run [DOWNLOAD_URL] [UPLOAD_URL] [?UPLOAD_FIELD_NAME] [?UPLOAD_FILE_NAME] [?REQUEST_TYPE]
 ```
 
 Example:

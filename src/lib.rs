@@ -162,7 +162,7 @@ impl UploadManager {
                 content_type_line = format!("\nContent-Type: {value}");
             }
 
-            let mut initial_data = Some(format!("--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"; filename=\"{file_name}\"{content_type_line}\r\n\r\n"));
+            let mut initial_data = Some(format!("--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"; filename=\"{file_name}\"{content_type_line}\r\n"));
 
             let final_data = format!("\r\n--{http_boundary}--\r\n");
 
@@ -181,10 +181,21 @@ impl UploadManager {
                 .read_function(move |buf| {
                     let message = receiver.lock().unwrap().recv().unwrap();
 
-                    if let Some(value) = &initial_data {
-                        let result = value.as_bytes().read(buf).unwrap();
-                        initial_data = None;
-                        Ok(result)
+                    if let Some(initial_data_string) = &initial_data {
+                        if let ManagerThreadMessage::Bytes(first_message) = message {
+                            let initial_data_bytes = initial_data_string.as_bytes();
+                            let first_message_bytes = first_message.as_ref();
+
+                            let mut final_data = initial_data_bytes.to_vec();
+                            final_data.append(&mut first_message_bytes.to_vec());
+
+                            let result = final_data.into_boxed_slice().as_ref().read(buf).unwrap();
+
+                            initial_data = None;
+                            Ok(result)
+                        } else {
+                            panic!("Received wrong first message");
+                        }
                     } else if let ManagerThreadMessage::Bytes(data) = message {
                         Ok(data.as_ref().read(buf).unwrap())
                     } else if let ManagerThreadMessage::PrepareToFinishSignal = message {
@@ -192,7 +203,7 @@ impl UploadManager {
                     } else if let ManagerThreadMessage::StopSignal = message {
                         Ok(0)
                     } else {
-                        panic!("Received non bytes message");
+                        panic!("Received wrong message");
                     }
                 })
                 .unwrap();

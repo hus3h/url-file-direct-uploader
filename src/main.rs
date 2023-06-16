@@ -16,19 +16,17 @@ fn main() {
             }
         }
 
-        let manager = Manager::new(
-            args.get(1).unwrap(),
-            args.get(2).unwrap(),
-            Some(vec![
-                ManagerUploadOption::FieldName(String::from(
-                    args.get(3).unwrap_or(&String::from("file")),
-                )),
-                ManagerUploadOption::FileName(String::from(
-                    args.get(5).unwrap_or(&String::from("file")),
-                )),
-                ManagerUploadOption::RequestType(request_type),
-            ]),
-        );
+        let mut options = vec![ManagerUploadOption::RequestType(request_type)];
+
+        if let Some(value) = args.get(3) {
+            options.push(ManagerUploadOption::FieldName(String::from(value)));
+        }
+
+        if let Some(value) = args.get(5) {
+            options.push(ManagerUploadOption::FileName(String::from(value)));
+        }
+
+        let manager = Manager::new(args.get(1).unwrap(), args.get(2).unwrap(), Some(options));
 
         manager.perform();
     } else {

@@ -1,5 +1,6 @@
 use curl::easy::{Easy, List};
 use std::{
+    collections::HashMap,
     io::Read,
     sync::{
         mpsc::{self, Receiver, Sender},
@@ -42,6 +43,7 @@ struct UploadManager {
     upload_url: String,
     upload_headers: Vec<String>,
     upload_options: Vec<ManagerUploadOption>,
+    upload_form_fields: HashMap<String, String>,
     http_boundary: String,
     message_receiver: Arc<Mutex<Receiver<ManagerThreadMessage>>>,
 }
@@ -124,6 +126,7 @@ impl UploadManager {
         let http_boundary = self.http_boundary.to_owned();
         let mut headers = self.upload_headers.clone();
         let upload_options = self.upload_options.clone();
+        let form_fields = self.upload_form_fields.clone();
 
         let request_thread = thread::spawn(move || {
             let receiver = Arc::clone(&initial_receiver);
@@ -170,7 +173,12 @@ impl UploadManager {
                 content_type_line = format!("\nContent-Type: {value}");
             }
 
-            let mut initial_data = Some(format!("--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"; filename=\"{file_name}\"{content_type_line}\r\n"));
+            let mut form_fields_data = String::new();
+            for (field_name, field_value) in form_fields {
+                form_fields_data = form_fields_data + &format!("--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"\r\n\r\n{field_value}\r\n");
+            }
+
+            let mut initial_data = Some(format!("{form_fields_data}--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"; filename=\"{file_name}\"{content_type_line}\r\n\r\n"));
 
             let final_data = format!("\r\n--{http_boundary}--\r\n");
 
@@ -239,6 +247,14 @@ impl UploadManager {
     fn set_headers(&mut self, headers: &Vec<&str>) {
         self.upload_headers = headers.iter().map(|item| (*item).to_owned()).collect();
     }
+
+    fn set_upload_form_fields(&mut self, fields: &HashMap<&str, &str>) {
+        let mut result = HashMap::new();
+        for (key, value) in fields {
+            result.insert(key.to_string(), value.to_string());
+        }
+        self.upload_form_fields = result;
+    }
 }
 
 pub struct Manager {
@@ -271,6 +287,7 @@ impl Manager {
             download_url: download_url.to_owned(),
             upload_url: upload_url.to_owned(),
             upload_options,
+            upload_form_fields: Default::default(),
             upload_headers,
             http_boundary,
             message_receiver,
@@ -304,6 +321,13 @@ impl Manager {
 
     pub fn set_upload_headers(&self, headers: &Vec<&str>) {
         self.upload_manager.lock().unwrap().set_headers(headers);
+    }
+
+    pub fn set_upload_form_fields(&self, fields: &HashMap<&str, &str>) {
+        self.upload_manager
+            .lock()
+            .unwrap()
+            .set_upload_form_fields(fields);
     }
 
     pub fn set_download_headers(&self, headers: &Vec<&str>) {

@@ -114,7 +114,7 @@ impl DownloadManager {
     }
 
     fn set_headers(&mut self, headers: &Vec<&str>) {
-        self.download_headers = headers.iter().map(|item| (*item).to_owned()).collect();
+        self.download_headers = headers.iter().map(|item| item.to_string()).collect();
     }
 }
 
@@ -245,7 +245,7 @@ impl UploadManager {
     }
 
     fn set_headers(&mut self, headers: &Vec<&str>) {
-        self.upload_headers = headers.iter().map(|item| (*item).to_owned()).collect();
+        self.upload_headers = headers.iter().map(|item| item.to_string()).collect();
     }
 
     fn set_upload_form_fields(&mut self, fields: &HashMap<&str, &str>) {
@@ -348,7 +348,7 @@ fn get_header_string_value(data: String) -> Option<(String, String)> {
     let split_data: Vec<&str> = data.split(": ").collect();
 
     if split_data.len() > 1 {
-        let key = (*split_data.get(0).unwrap()).to_owned();
+        let key = (split_data.get(0).unwrap()).to_string();
         let other_values: Vec<&str> = split_data.iter().skip(1).map(|item| *item).collect();
 
         Some((key, other_values.join(": ")))
@@ -362,5 +362,5 @@ fn guess_file_name_from_url(url: &String) -> String {
     let last_part = *split_data.iter().last().unwrap();
 
     let split_data: Vec<&str> = last_part.split("?").collect();
-    (*split_data.get(0).unwrap()).to_owned()
+    (split_data.get(0).unwrap()).to_string()
 }

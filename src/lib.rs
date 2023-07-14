@@ -267,10 +267,8 @@ impl Manager {
         download_url: &str,
         upload_url: &str,
         upload_options: Option<Vec<ManagerUploadOption>>,
-        upload_headers: Option<Vec<String>>,
     ) -> Self {
         let upload_options = upload_options.unwrap_or(vec![]);
-        let upload_headers = upload_headers.unwrap_or(vec![]);
         let http_boundary = String::from("---------------------------15875380808008");
 
         let (message_sender, message_receiver) = mpsc::channel::<ManagerThreadMessage>();
@@ -288,7 +286,7 @@ impl Manager {
             upload_url: upload_url.to_owned(),
             upload_options,
             upload_form_fields: Default::default(),
-            upload_headers,
+            upload_headers: Default::default(),
             http_boundary,
             message_receiver,
         }));

@@ -30,12 +30,7 @@ fn main() {
             }
         }
 
-        let manager = Manager::new(
-            args.get(1).unwrap(),
-            args.get(2).unwrap(),
-            Some(options),
-            None,
-        );
+        let manager = Manager::new(args.get(1).unwrap(), args.get(2).unwrap(), Some(options));
 
         manager.perform();
     } else {

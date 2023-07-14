@@ -178,7 +178,7 @@ impl UploadManager {
                 form_fields_data = form_fields_data + &format!("--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"\r\n\r\n{field_value}\r\n");
             }
 
-            let mut initial_data = Some(format!("{form_fields_data}--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"; filename=\"{file_name}\"{content_type_line}\r\n\r\n"));
+            let mut initial_data = Some(format!("{form_fields_data}--{http_boundary}\r\nContent-Disposition: form-data; name=\"{field_name}\"; filename=\"{file_name}\"{content_type_line}\r\n"));
 
             let final_data = format!("\r\n--{http_boundary}--\r\n");
 
